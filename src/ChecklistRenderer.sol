@@ -1,18 +1,109 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.10;
 
-import "forge-std/console.sol";
 import {ColorLib} from "zorb/ColorLib.sol";
 import {Base64} from "base64/base64.sol";
 import {Strings} from "openzeppelin-contracts/utils/Strings.sol";
 import {IMetadataRenderer} from "zora-drops-contracts/interfaces/IMetadataRenderer.sol";
+import {ERC721Drop} from "zora-drops-contracts/ERC721Drop.sol";
 
-contract InfiniteCheckRenderer is IMetadataRenderer {
+contract ChecklistRenderer is IMetadataRenderer {
 
-    function buildSVG() public view returns (string memory) {
-        uint256 balanceOf = 80;
-        address user = address(42069);
-        require(balanceOf <= 80, "Check: Max items reached");
+    string public name;
+    string public description;
+    string public contractImage;
+    string public sellerFeeBasisPoints;
+    string public sellerFeeRecipient;
+    string public externalLink;
+    ERC721Drop tokenContract;
+
+    constructor(
+        string memory _name,
+        string memory _description,
+        string memory _contractImage,
+        string memory _sellerFeeBasisPoints,
+        string memory _sellerFeeRecipient,
+        string memory _externalLink,
+        address payable _erc721DropAddress
+    ) {
+        tokenContract = ERC721Drop(_erc721DropAddress);
+        name = _name;
+        description = _description;
+        contractImage = _contractImage;
+        sellerFeeBasisPoints = _sellerFeeBasisPoints;
+        sellerFeeRecipient = _sellerFeeRecipient;
+        externalLink = _externalLink;
+    }
+
+    function tokenURI(uint256 tokenId) external view returns (string memory) {
+        require(
+            tokenContract.totalSupply() >= tokenId,
+            "Token does not exist."
+        );
+
+        address ownerOf = tokenContract.ownerOf(tokenId);
+        uint256 balanceOf = tokenContract.balanceOf(ownerOf);
+
+        require(balanceOf <= 80, "Balance should not be greater than 80");
+
+        string memory json;
+        string memory idString = Strings.toString(tokenId);
+
+        json = Base64.encode(
+            bytes(
+                string(
+                    abi.encodePacked(
+                        '{"name": "',
+                        name,
+                        " #",
+                        idString,
+                        '", "title": "',
+                        name,
+                        " #",
+                        idString,
+                        '", "description": "',
+                        description,
+                        '", "image": "',
+                        buildSVG(ownerOf, balanceOf),
+                        '"}'
+                    )
+                )
+            )
+        );
+        return string(abi.encodePacked("data:application/json;base64,", json));
+    }
+
+    function contractURI() public view returns (string memory) {
+        return
+        string(
+            abi.encodePacked(
+                "data:application/json;base64,",
+                Base64.encode(
+                    bytes(
+                        string(
+                            abi.encodePacked(
+                                '{"name": "',
+                                name,
+                                's", "description": "',
+                                description,
+                                '", "image": "',
+                                contractImage,
+                                '", "seller_fee_basis_points": "',
+                                sellerFeeBasisPoints,
+                                '", "seller_fee_recipient": "',
+                                sellerFeeRecipient,
+                                '", "external_link": "',
+                                externalLink,
+                                '"}'
+                            )
+                        )
+                    )
+                )
+            )
+        );
+    }
+
+    function buildSVG(address user, uint256 balanceOf) public view returns (string memory) {
         string memory checks = "";
         for (uint256 i = 0; i < balanceOf; i++) {
             checks = string(abi.encodePacked(checks, checkForIndex(uint8(i), true, user)));
@@ -60,14 +151,6 @@ contract InfiniteCheckRenderer is IMetadataRenderer {
                 color,
                 '"/></g>'
             ));
-    }
-
-    function tokenURI(uint256) external view returns (string memory){
-        return "TEST";
-    }
-
-    function contractURI() external view returns (string memory){
-        return "TEST";
     }
 
     function initializeWithData(bytes memory initData) external {

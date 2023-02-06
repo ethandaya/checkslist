@@ -16,3 +16,7 @@
 [submodule "lib/zorb"]
 	path = lib/zorb
 	url = https://github.com/ourzora/zorb
+[submodule "lib/erc721a"]
+	path = lib/erc721a
+	url = https://github.com/chiru-labs/erc721a
+	branch = v4.2.3

@@ -2,3 +2,4 @@ zora-drops-contracts/=lib/zora-drops-contracts/src/
 openzeppelin-contracts/=lib/openzeppelin-contracts/contracts/
 zorb/=lib/zorb/packages/zorb-contracts/contracts/
 base64/=lib/base64/
+erc721a/=lib/erc721a/contracts/
