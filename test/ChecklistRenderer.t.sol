@@ -12,6 +12,7 @@ contract ChecklistRendererTest is Test {
     ChecklistRenderer renderer;
 
     function setUp() public {
+        tokenContract = new ERC721AMock("MOCK", "MCK");
         renderer = new ChecklistRenderer(
             "Checklist",
             "descr",
@@ -19,14 +20,19 @@ contract ChecklistRendererTest is Test {
             Strings.toString(250),
             string(abi.encodePacked(msg.sender)),
             "checklist.wtf",
-            payable(address(123))
+            payable(address(tokenContract))
         );
     }
 
     function test_buildSVG() public {
-        string memory svg = renderer.buildSVG(address(0), 20);
+        string memory svg = renderer.buildSVG(address(42069), 20);
         assertEq(vm.readFile('./test/__snapshots__/test_buildSVG.txt'), svg);
     }
 
-
+    function test_tokenURI() public {
+        vm.prank(address(42060));
+        tokenContract.mint(msg.sender, 20);
+        string memory uri = renderer.tokenURI(19);
+        assertEq(vm.readFile('./test/__snapshots__/test_tokenURI.txt'), uri);
+    }
 }
