@@ -28,8 +28,8 @@ contract Deploy is Script {
         CheckslistRenderer renderer = new CheckslistRenderer(
             "Checkslist",
             "This list may or may not be notable...or done.",
-            "ipfs:///bafybeibvflhws7clzdeqlpoie65dfgx62thoatry6oayv56loqheb3xqka",
-            Strings.toString(250),
+            "ipfs:///bafybeigxtnej7okquznh3bxoj263lg45bhpgv4lfbmbs35jxofuqjer6oy",
+            Strings.toString(ROYALTY_BPS),
             string(abi.encodePacked(msg.sender)),
             "https://checkslist.wtf",
             payable(address(vm.envAddress("EDITION_ADDRESS")))
